@@ -488,7 +488,6 @@
 
 
 
-
 require("dotenv").config();
 const { Client } = require("@notionhq/client");
 
@@ -571,6 +570,8 @@ async function fetchProjects() {
         console.log("This is the sub itme id ", subItem["id"])
         //maybe other api request here????
 
+
+
         // const milestoneProperty = subItem.properties["Milestone"];
         // const title = milestoneProperty && milestoneProperty.title && milestoneProperty.title.length > 0
         //   ? milestoneProperty.title[0].text.content
@@ -605,19 +606,29 @@ async function fetchProjects() {
       const projectName = page.properties["Milestone"] && page.properties["Milestone"].title.length > 0
         ? page.properties["Milestone"].title[0].text.content
         : "Project Name Not Available";
-      const startDate = page.properties["Start Date"] && page.properties["Start Date"].date
-        ? page.properties["Start Date"].date.start || new Date('2024-06-01')
-        : new Date('2024-06-01');
-      const endDate = page.properties["Milestone Deadline"] && page.properties["Milestone Deadline"].date
-        ? page.properties["Milestone Deadline"].date.start || new Date('2024-06-01')
-        : new Date('2024-06-01');
-      const children = getSubItems(page.id)
+        const startDate = page.properties["Start Date"] && page.properties["Start Date"].date
+        ? page.properties["Start Date"].date.start || new Date('2024-06-01').toISOString()
+        : new Date('2024-06-01').toISOString();
+    
+    const endDate = page.properties["Milestone Deadline"] && page.properties["Milestone Deadline"].date
+        ? page.properties["Milestone Deadline"].date.start || new Date('2024-06-01').toISOString()
+        : new Date('2024-06-01').toISOString();
+    
 
+
+      // const startDate = page.properties["Start Date"] && page.properties["Start Date"].date
+      //   ? page.properties["Start Date"].date.start || new Date('2024-06-01')
+      //   : new Date('2024-06-01');
+      // const endDate = page.properties["Milestone Deadline"] && page.properties["Milestone Deadline"].date
+      //   ? page.properties["Milestone Deadline"].date.start || new Date('2024-06-01')
+      //   : new Date('2024-06-01');
+      const children = getSubItems(page.id)
+      // console.log("This is the start date", startDate["Start Date"])
     return {
       id: page.id,
       name: projectName,
-      actualStart: startDate,
-      actualEnd: endDate,
+      actualStart: "5/20/20",
+      actualEnd: "5/10/20",
       children: children
     };
   });
