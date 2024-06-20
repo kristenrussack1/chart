@@ -568,26 +568,29 @@ async function fetchProjects() {
       console.log("This is the response:", JSON.stringify(response.results, null, 2));
   
       return response.results.map(subItem => {
-        const milestoneProperty = subItem.properties["Milestone"];
-        const title = milestoneProperty && milestoneProperty.title && milestoneProperty.title.length > 0
-          ? milestoneProperty.title[0].text.content
-          : "Sub-item Name Not Available";
+        console.log("This is the sub itme id ", subItem["id"])
+        //maybe other api request here????
+
+        // const milestoneProperty = subItem.properties["Milestone"];
+        // const title = milestoneProperty && milestoneProperty.title && milestoneProperty.title.length > 0
+        //   ? milestoneProperty.title[0].text.content
+        //   : "Sub-item Name Not Available";
   
-        const startDateProperty = subItem.properties["Start Date"];
-        const startDate = startDateProperty && startDateProperty.date ? startDateProperty.date.start : "Start Date Not Available";
+        // const startDateProperty = subItem.properties["Start Date"];
+        // const startDate = startDateProperty && startDateProperty.date ? startDateProperty.date.start : "Start Date Not Available";
   
-        const endDateProperty = subItem.properties["Milestone Deadline"];
-        const endDate = endDateProperty && endDateProperty.date ? endDateProperty.date.end : "End Date Not Available";
+        // const endDateProperty = subItem.properties["Milestone Deadline"];
+        // const endDate = endDateProperty && endDateProperty.date ? endDateProperty.date.end : "End Date Not Available";
   
-        const progressProperty = subItem.properties["Progress"];
-        const progressValue = progressProperty && progressProperty.number ? progressProperty.number : 0;
+        // const progressProperty = subItem.properties["Progress"];
+        // const progressValue = progressProperty && progressProperty.number ? progressProperty.number : 0;
   
         return {
-          id: subItem.id,
-          name: title,
-          actualStart: startDate,
-          actualEnd: endDate,
-          progressValue: progressValue,
+          id: "1",
+          name: "hi",
+          actualStart: null,
+          actualEnd: null,
+          progressValue: "20",
           progress: { fill: "#455a64 0.5", stroke: "0.5 #dd2c00" }
         };
       });
@@ -608,7 +611,6 @@ async function fetchProjects() {
       const endDate = page.properties["Milestone Deadline"] && page.properties["Milestone Deadline"].date
         ? page.properties["Milestone Deadline"].date.start || new Date('2024-06-01')
         : new Date('2024-06-01');
-      const progress = page.properties["Progress"] && page.properties["Progress"].number ? page.properties["Progress"].number : 0;
       const children = getSubItems(page.id)
 
     return {
@@ -709,6 +711,5 @@ const main = async () => {
 // Execute the main function
 main();
 
-exports.fetchProjects =  fetchProjects;
-// exports.getDatabase = getDatabase;
-
+// exports.fetchProjects =  fetchProjects;
+exports.getDatabase = fetchProjects;
