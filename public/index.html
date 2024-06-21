@@ -480,6 +480,8 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.anychart.com/releases/8.12.1/js/anychart-base.min.js"></script>
   <script src="https://cdn.anychart.com/releases/8.12.1/js/anychart-gantt.min.js"></script>
   <style>
@@ -498,7 +500,7 @@
   <div id="container"></div>
   <script>
     async function fetchProjects() {
-      const rest = await fetch("http://localhost:8008/users");
+      const rest = await fetch("http://localhost:8009/users", { mode: 'no-cors' });
       const data = await rest.json();
       return data;
     }
@@ -513,8 +515,8 @@
           return {
             id: value.id,
             name: value.projectName,
-            actualStart: value.startDate,
-            actualEnd: value.endDate,
+            actualStart: new Date(value.startDate),
+            actualEnd: new Date(value.endDate)
             //the dates arrnt working here for some reason
           //   children:[ results.map(subitem => ({
           //     id: subitem.id,
