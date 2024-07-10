@@ -4,142 +4,179 @@ const { Client } = require("@notionhq/client");
 // Initialize Notion client with API key
 const notion = new Client({ auth: process.env.NOTION_API_KEY });
 
-// Retrieve Notion database ID from environment variables
-const databaseId = process.env.NOTION_API_DATABASE;
+// Retrieve Notion database IDs from environment variables
+const projectDatabaseId = process.env.NOTION_API_PROJECT_DATABASE;
+const tasksDatabaseId = process.env.NOTION_API_TASKS_DATABASE;
 
+projectName="";
 
-async function fetchProjects() {
-  const response = await notion.databases.query({ database_id: databaseId });
-  
-  // First filter out sub-items
-  const projects = response.results.filter(page => {
-    return !(page.properties["Parent item"] && page.properties["Parent item"].relation.length > 0);
-  });
-
-  projects.sort((a, b) => {
-    const startDateA = a.properties["Start Date"] && a.properties["Start Date"].date
-      ? new Date(a.properties["Start Date"].date.start)
-      : new Date('01-01-2024');
-    const startDateB = b.properties["Start Date"] && b.properties["Start Date"].date
-      ? new Date(b.properties["Start Date"].date.start)
-      : new Date('01-01-2024');
-    return startDateA - startDateB;
-  });
-
-  async function getSubItems(parentId) {
-    try {
-      const response = await notion.databases.query({
-        database_id: databaseId,
-        filter: {
-          property: "Parent item",
-          relation: {
-            contains: parentId
-          }
-        }
-      });
-
-      
-      console.log("This is the response:", JSON.stringify(response.results, null, 2));
-  
-        const sortedSubItems = response.results.sort((a, b) => {
-          const startDateA = a.properties["Start Date"] && a.properties["Start Date"].date
-            ? new Date(a.properties["Start Date"].date.start)
-            : new Date('01-01-2024');
-          const startDateB = b.properties["Start Date"] && b.properties["Start Date"].date
-            ? new Date(b.properties["Start Date"].date.start)
-            : new Date('01-01-2024');
-          return startDateA - startDateB;
-        });
-
-        // return response.results.map(subItem => {
-
-          return sortedSubItems.map(subItem => {
-        console.log("This is the sub itme id ", subItem["id"])
-
-
-        const subitemId = subItem.id;
-
-
-        const milestoneProperty = subItem.properties["Milestone"];
-        const title = milestoneProperty && milestoneProperty.title && milestoneProperty.title.length > 0
-          ? milestoneProperty.title[0].text.content
-          : "Sub-item Name Not Available";
-  
-        const startDateProperty = subItem.properties["Start Date"];
-        const startDate = startDateProperty && startDateProperty.date ? startDateProperty.date.start : "Start Date Not Available";
-  
-        const endDateProperty = subItem.properties["Milestone Deadline"];
-        const endDate = endDateProperty && endDateProperty.date ? endDateProperty.date.start : "End Date Not Available";
-  
-        const progressProperty = subItem.properties["Progress"];
-        const progressValue = progressProperty && progressProperty.number ? progressProperty.number : 0;
-  
-        return {
-          id: subitemId,
-          name: title,
-          actualStart: startDate,
-          actualEnd: endDate,
-          progressValue: progressValue,
-          progress: { fill: "#455a64 0.5", stroke: "0.5 #dd2c00" }
-        };
-      });
-
-    } catch (error) {
-      console.error("Error fetching sub-items:", error);
-      return [];
-    }
-  }
-  
-  
-    const projectsWithSubItems = await Promise.all(projects.map(async page => {
-
-      const projectName = page.properties["Milestone"] && page.properties["Milestone"].title.length > 0
-        ? page.properties["Milestone"].title[0].text.content
-        : "Project Name Not Available";
-        const startDate = page.properties["Start Date"] && page.properties["Start Date"].date
-        ? page.properties["Start Date"].date.start || new Date('01-01-2024').toISOString()
-        : new Date('01-01-2024').toISOString();
-    
-    const endDate = page.properties["Milestone Deadline"] && page.properties["Milestone Deadline"].date
-        ? page.properties["Milestone Deadline"].date.start || new Date('01-01-2024').toISOString()
-        : new Date('01-01-2024').toISOString();
-
-      const children = await getSubItems(page.id)
-
-    return {
-      id: page.id,
-      name: projectName,
-      actualStart: startDate,
-      actualEnd: endDate,
-      children: children
-    };
-
-
-
-
-  }));
-  return projectsWithSubItems;
+async function fetchBizDev(){
+    return fetchProjects("Business Development");
 }
 
+async function fetchRobotArm(){
+    return fetchProjects("Robotic Arm Development");
+}
+
+
+// Function to fetch projects and their hierarchical children
+async function fetchProjects(projectName) {
+  try {
+  
+    const projectResponse = await notion.databases.query({
+      database_id: projectDatabaseId,
+    });
+
+    // Find the project by name
+    const theProject = projectResponse.results.find(
+      (page) =>
+        page.properties["Project name"]?.title[0]?.text?.content === projectName
+    );
+
+    if (!theProject) {
+      throw new Error("Project not found");
+    }
+
+    const theProjectId = theProject.id;
+    console.log("Project Project ID:", theProjectId);
+
+    // Function to recursively fetch hierarchical sub-items for a task
+    async function getSubItems(parentId) {
+      try {
+        const response = await notion.databases.query({
+          database_id: tasksDatabaseId,
+          filter: {
+            and: [
+              {
+                property: "Parent-task", // Assuming "Parent-task" is the relation property linking sub-items to tasks
+                relation: {
+                  contains: parentId
+                }
+              },
+              {
+                property: "Project",
+                relation: {
+                  contains: theProjectId
+                }
+              },
+              {
+                property: "Task Status",
+                status: {
+                  does_not_equal: "Archived"
+                }
+              }
+            ]
+          },
+          sorts: [
+            {
+              property: "Start Date", // Sort sub-items by Start Date
+              direction: "ascending"
+            }
+          ]
+        });
+
+        return await Promise.all(response.results.map(async (subItem) => ({
+          id: subItem.id,
+          name: subItem.properties["Task name"]?.title[0]?.text?.content || "Sub-item Name Not Available",
+          actualStart: subItem.properties["Start Date"]?.date?.start || "Start Date Not Available",
+          actualEnd: subItem.properties["End Date"]?.date?.start || "End Date Not Available",
+          children: await getSubItems(subItem.id) // Recursively fetch sub-items
+        })));
+      } catch (error) {
+        console.error("Error fetching sub-items:", error);
+        return [];
+      }
+    }
+
+    // Step 2: Fetch all tasks and their sub-items
+    const tasksResponse = await notion.databases.query({
+      database_id: tasksDatabaseId,
+      filter: {
+        and: [
+          {
+            property: "Project", // Assuming "Project" is the relation property linking tasks to projects
+            relation: {
+              contains: theProjectId,
+            },
+          },
+          {
+            property: "Parent-task", // Assuming "Parent item" is the relation property linking tasks to parent items
+            relation: {
+              is_empty: true // Filter tasks with no parent item
+            }
+          },
+          // {
+          //   property: "Task Status",
+          //   status: {
+          //     equals: "Archived"
+          //   }
+          // }
+        ]
+      },
+    });
+
+    const allTasks = await Promise.all(tasksResponse.results.map(async (task) => ({
+      id: task.id,
+      name: task.properties["Task name"]?.title[0]?.text?.content || "Task Name Not Available",
+      actualStart: task.properties["Start Date"]?.date?.start || new Date('2024-06-01').toISOString(),
+      actualEnd: task.properties["End Date"]?.date?.start || new Date('2024-06-01').toISOString(),
+      parentId: task.properties["Parent item"]?.relation[0]?.id || null, // Corrected this line
+      children: await getSubItems(task.id), // Fetch sub-items for each task
+    })));
+
+    console.log("Tasks with Sub-items:", JSON.stringify(allTasks, null, 2));
+    
+    allTasks.sort((a, b) => new Date(a.actualStart) - new Date(b.actualStart));
+
+    // Exclude items with "Project Name Not Available"
+    const filteredItems = allTasks.filter(item => item.name !== "Project Name Not Available");
+
+    // Organize items into parent-children structure
+    const itemsMap = {};
+    filteredItems.forEach(item => {
+        itemsMap[item.id] = item;
+    });
+
+    filteredItems.forEach(item => {
+        if (item.parentId) {
+            const parent = itemsMap[item.parentId];
+            if (parent) {
+                parent.children.push(item);
+            }
+        }
+    });
+
+    const topLevelItems = filteredItems.filter(item => !item.parentId);
+    console.log("Top Level Items:", JSON.stringify(topLevelItems, null, 2));
+
+    return topLevelItems; // Return the top level items
+
+  } catch (error) {
+    console.error("Error fetching projects and tasks:", error);
+    throw error;
+  }
+}
 
 // Main function to demonstrate usage
 const main = async () => {
   try {
- 
-    const pages = await fetchProjects();
-
-    // Log the details
-    console.log("Pages:", JSON.stringify(pages, null, 2));
-
-    return pages; // Return the array of page details
+    // const projects = await fetchProjects(projectName);
+    const projects = await fetchBizDev();
+    console.log("Fetched Projects:", JSON.stringify(projects, null, 2));
   } catch (error) {
     console.error("An error occurred:", error);
-    throw error;
+  }
+  try {
+    // const projects = await fetchProjects(projectName);
+    const projects2 = await fetchRobotArm();
+    console.log("Fetched Projects:", JSON.stringify(projects2, null, 2));
+  } catch (error) {
+    console.error("An error occurred:", error);
   }
 };
 
-// Execute the main function
 main();
 
 
-exports.getDatabase = fetchProjects;
+exports.fetchRobotArm = fetchRobotArm;
+exports.fetchBizDev = fetchBizDev;
