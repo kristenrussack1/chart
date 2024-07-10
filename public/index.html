@@ -22,7 +22,7 @@
   <div id="container2"></div>
   <script>
     async function fetchProjects(endpoint) {
-      const rest = await fetch(`http://localhost:8002/${endpoint}`);
+      const rest = await fetch(`/${endpoint}`);
       const data = await rest.json();
       return data;
     }
