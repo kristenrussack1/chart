@@ -80,7 +80,8 @@ async function fetchProjects(projectName) {
           name: subItem.properties["Task name"]?.title[0]?.text?.content || "Sub-item Name Not Available",
           actualStart: subItem.properties["Start Date"]?.date?.start || "Start Date Not Available",
           actualEnd: subItem.properties["End Date"]?.date?.start || "End Date Not Available",
-          children: await getSubItems(subItem.id) // Recursively fetch sub-items
+          children: await getSubItems(subItem.id), // Recursively fetch sub-items
+          progressValue: subItem.properties["Progress"]?.number || 0,
         })));
       } catch (error) {
         console.error("Error fetching sub-items:", error);
@@ -105,12 +106,7 @@ async function fetchProjects(projectName) {
               is_empty: true // Filter tasks with no parent item
             }
           },
-          // {
-          //   property: "Task Status",
-          //   status: {
-          //     equals: "Archived"
-          //   }
-          // }
+          
         ]
       },
     });
@@ -122,6 +118,7 @@ async function fetchProjects(projectName) {
       actualEnd: task.properties["End Date"]?.date?.start || new Date('2024-06-01').toISOString(),
       parentId: task.properties["Parent item"]?.relation[0]?.id || null, // Corrected this line
       children: await getSubItems(task.id), // Fetch sub-items for each task
+      progressValue: task.properties["Progress"]?.number || 0,
     })));
 
     console.log("Tasks with Sub-items:", JSON.stringify(allTasks, null, 2));
@@ -149,7 +146,37 @@ async function fetchProjects(projectName) {
     const topLevelItems = filteredItems.filter(item => !item.parentId);
     console.log("Top Level Items:", JSON.stringify(topLevelItems, null, 2));
 
-    return topLevelItems; // Return the top level items
+// Calculate progress for parent tasks
+function calculateProgress(tasks) {
+  tasks.forEach(task => {
+    if (task.children.length > 0) {
+      calculateProgress(task.children);
+      const totalProgress = task.children.reduce((sum, child) => sum + child.progressValue, 0);
+      task.progressValue = totalProgress / task.children.length;
+    }
+  });
+}
+
+calculateProgress(topLevelItems);
+
+// Adjusting progress values by dividing by 100 for top-level items
+topLevelItems.forEach(task => {
+  task.progressValue /= 100; // Adjust for the top-level items
+  adjustChildProgress(task.children); // Adjust child tasks
+});
+
+// Function to adjust progress values for child tasks
+function adjustChildProgress(children) {
+  children.forEach(child => {
+    child.progressValue /= 100;
+    if (child.children.length > 0) {
+      adjustChildProgress(child.children); // Recursively adjust child tasks
+    }
+  });
+}
+
+return topLevelItems; // Return the top level items
+
 
   } catch (error) {
     console.error("Error fetching projects and tasks:", error);

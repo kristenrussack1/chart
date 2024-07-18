@@ -41,7 +41,9 @@
             actualStart: value.actualStart,
             actualEnd: value.actualEnd,
             children: value.children,
-            container: { fill: "#dd2c00", stroke: "#dd2c00" }
+            container: { fill: "#dd2c00", stroke: "#dd2c00" },
+            progressValue: value.progressValue,
+            progress: {fill: "15a9c7", stroke: "15a9c7"},
         }));
 
         // Create a data tree
@@ -63,6 +65,9 @@
         chart.getTimeline().markers().fill("dark red");
         chart.getTimeline().markers().stroke("dark red");
 
+
+        chart.splitterPosition("15%");
+
         // Set the container id
         chart.container(containerId);
 
@@ -77,6 +82,23 @@
         parentTasks.selected().fill("#0288d1");
         parentTasks.normal().stroke("#0288d1");
         parentTasks.selected().stroke("#0288d1");
+
+
+
+
+        //PROGRESS
+        var tasks = chart.getTimeline().tasks();
+        tasks.progress().normal().fill("15a9c7");
+        tasks.progress().selected().fill("15a9c7");
+        tasks.progress().selected().stroke("15a9c7");
+
+        // configure progress bars of parent tasks
+        var parentTasks = chart.getTimeline().groupingTasks();
+        parentTasks.progress().normal().fill("15a9c7");
+        parentTasks.progress().selected().fill("15a9c7");
+        parentTasks.progress().selected().stroke("15a9c7");
+
+
 
         var tasks = chart.getTimeline().tasks();
         tasks.normal().fill("#15a9c7 0.5");
@@ -110,13 +132,7 @@
     fetchDataAndRenderChart("biz-dev", "container1", "Kazvu Lab's Development Phases and Milestones");
     fetchDataAndRenderChart("robot-arm", "container2", "Robot Arm Project Timeline");
 
-    // async function pollDataAndUpdateCharts() {
-    //   await fetchDataAndRenderChart("biz-dev", "container1", "Kazvu Lab's Development Phases and Milestones");
-    //   await fetchDataAndRenderChart("robot-arm", "container2", "Robot Arm Project Timeline");
-    //   setTimeout(pollDataAndUpdateCharts, 60000); // Poll every 60 seconds
-    // }
-
-    // pollDataAndUpdateCharts();
+ 
   </script>
 </body>
 </html>
