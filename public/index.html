@@ -11,7 +11,7 @@
       height: 100%;
       width: 100%;
     }
-    #container1, #container2 {
+    #container1, #container2, #container3 {
       width: 100%;
       height: 100%;
     }
@@ -20,6 +20,7 @@
 <body>
   <div id="container1"></div>
   <div id="container2"></div>
+  <div id="container3"></div>
   <script>
     async function fetchProjects(endpoint) {
       const rest = await fetch(`/${endpoint}`);
@@ -131,6 +132,7 @@
 
     fetchDataAndRenderChart("biz-dev", "container1", "Kazvu Lab's Development Phases and Milestones");
     fetchDataAndRenderChart("robot-arm", "container2", "Robot Arm Project Timeline");
+    fetchDataAndRenderChart("demo", "container3", "Cleaning Process Improvements");
 
  
   </script>

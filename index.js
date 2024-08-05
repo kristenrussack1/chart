@@ -1,3 +1,4 @@
+
 require("dotenv").config();
 const { Client } = require("@notionhq/client");
 
@@ -16,6 +17,10 @@ async function fetchBizDev(){
 
 async function fetchRobotArm(){
     return fetchProjects("Robotic Arm Development");
+}
+
+async function fetchDemo(){
+  return fetchProjects("Cleaning Process Improvements");
 }
 
 
@@ -207,3 +212,4 @@ main();
 
 exports.fetchRobotArm = fetchRobotArm;
 exports.fetchBizDev = fetchBizDev;
+exports.fetchDemo = fetchDemo;

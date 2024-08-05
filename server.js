@@ -2,6 +2,7 @@ const express = require("express");
 const moduleToFetch  = require("./index");
 const fetchRobotArm = moduleToFetch.fetchRobotArm;
 const fetchBizDev = moduleToFetch.fetchBizDev;
+const fetchDemo = moduleToFetch.fetchDemo;
 
 
 
@@ -22,7 +23,10 @@ app.use(express.static("public"));
     res.json(users);
 });
 
-
+  app.get("/demo", async (req, res) => {
+    const users = await fetchDemo();
+    res.json(users);
+});
 
 
 app.listen(port, console.log(`Server started on ${port}`));
