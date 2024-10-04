@@ -1,5 +1,5 @@
 const getDataFromBackend = async () => {
-    const response = await fetch("http://localhost:8009/users");
+    const response = await fetch("/users");
     const data = await response.json();
     return data;
   };
@@ -10,4 +10,3 @@ const getDataFromBackend = async () => {
   };
   
   addData();
-  
