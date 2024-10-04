@@ -8,7 +8,6 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
   "dependencies": {
     "@notionhq/client": "^2.2.15",
     "canvas": "^2.11.2",
@@ -16,5 +15,6 @@
     "express": "^4.19.2",
     "googleapis": "^140.0.0",
     "node-fetch": "^3.3.2"
-  }
+  },
+  "description": ""
 }
