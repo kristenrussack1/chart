@@ -23,6 +23,18 @@ async function fetchDemo(){
   return fetchProjects("Cleaning Process Improvements");
 }
 
+async function fetchv3(){
+  return fetchProjects("SoftLabs");
+}
+
+async function fetchjfdi(){
+  return fetchProjects("JFDI");
+}
+
+async function fetchLaundryRobot(){
+  return fetchProjects("Laundry Robot");
+}
+
 
 // Function to fetch projects and their hierarchical children
 async function fetchProjects(projectName) {
@@ -111,6 +123,13 @@ async function fetchProjects(projectName) {
               is_empty: true // Filter tasks with no parent item
             }
           },
+
+          {
+            property: "Task Status",
+            status: {
+              does_not_equal: "Archived"
+            }
+          }
           
         ]
       },
@@ -213,3 +232,6 @@ main();
 exports.fetchRobotArm = fetchRobotArm;
 exports.fetchBizDev = fetchBizDev;
 exports.fetchDemo = fetchDemo;
+exports.fetchv3 = fetchv3;
+exports.fetchjfdi = fetchjfdi;
+exports.fetchLaundryRobot = fetchLaundryRobot;

@@ -3,10 +3,14 @@ const moduleToFetch  = require("./index");
 const fetchRobotArm = moduleToFetch.fetchRobotArm;
 const fetchBizDev = moduleToFetch.fetchBizDev;
 const fetchDemo = moduleToFetch.fetchDemo;
+const fetchv3 = moduleToFetch.fetchv3;
+const fetchjfdi = moduleToFetch.fetchjfdi;
+const fetchLaundryRobot = moduleToFetch.fetchLaundryRobot;
 
 
 
-const port = 8004;
+
+const port = 8005;
 const app = express();
 
 app.use(express.static("public"));
@@ -27,6 +31,22 @@ app.use(express.static("public"));
     const users = await fetchDemo();
     res.json(users);
 });
+
+app.get("/v3", async (req, res) => {
+  const users = await fetchv3();
+  res.json(users);
+});
+
+app.get("/jfdi", async (req, res) => {
+  const users = await fetchjfdi();
+  res.json(users);
+});
+
+app.get("/LaundryRobot", async (req, res) => {
+  const users = await fetchLaundryRobot();
+  res.json(users);
+});
+
 
 
 app.listen(port, console.log(`Server started on ${port}`));
