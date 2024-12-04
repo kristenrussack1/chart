@@ -26,14 +26,8 @@
   <div id="container5"></div>
   <div id="container6"></div>
   <script>
-<<<<<<< HEAD
-    async function fetchProjects() {
-      // const rest = await fetch("https://social-hotels-take.loca.lt/");
-      const rest = await fetch("http://localhost:8009/users");
-=======
     async function fetchProjects(endpoint) {
       const rest = await fetch(`/${endpoint}`);
->>>>>>> 1844da3f49a3102392dc1b5230f1958a7f0a5edf
       const data = await rest.json();
       return data;
     }
@@ -46,26 +40,12 @@
       const currentDate = new Date().toISOString().split('T')[0];
 
 
-      const currentDate = new Date().toISOString().split('T')[0];
+      // const currentDate = new Date().toISOString().split('T')[0];
 
       anychart.onDocumentReady(function () {
         let formattedData = projects.map(value => ({
             id: value.id,
             name: value.name,
-<<<<<<< HEAD
-            actualStart: new Date(value.actualStart),
-            actualEnd: new Date(value.actualEnd),
-            children: Array.isArray(value.children) ? value.children.map(subitem => ({
-              id: subitem.id,
-              name: subitem.name,
-              actualStart: new Date(subitem.actualStart),
-              actualEnd: new Date(subitem.actualEnd),
-              progressValue: subitem.progressValue,
-              progress: subitem.progress
-            })) : []
-          };
-        });
-=======
             actualStart: value.actualStart,
             actualEnd: value.actualEnd,
             children: value.children,
@@ -73,7 +53,6 @@
             progressValue: value.progressValue,
             progress: {fill: "15a9c7", stroke: "15a9c7"},
         }));
->>>>>>> 1844da3f49a3102392dc1b5230f1958a7f0a5edf
 
         // Create a data tree
         var treeData = anychart.data.tree(formattedData, "as-tree");
@@ -84,11 +63,6 @@
         // Set the data
         chart.data(treeData);
 
-<<<<<<< HEAD
-        chart.getTimeline().markers().fill("dark red");
-        chart.getTimeline().markers().stroke("dark red");
-        // chart.getTimeline().markers().normal().width(35);
-=======
         chart.getTimeline().scale().zoomLevels([
           [
             { unit: "month", count: 1 },
@@ -101,7 +75,6 @@
 
 
         chart.splitterPosition("15%");
->>>>>>> 1844da3f49a3102392dc1b5230f1958a7f0a5edf
 
         // Set the container id
         chart.container(containerId);
@@ -112,34 +85,6 @@
         // Fit elements to the width of the timeline
         chart.fitAll();
 
-<<<<<<< HEAD
-
-        chart.getTimeline().scale().zoomLevels([
-  [
-    {unit: "month", count: 1},
-    {unit: "year", count: 1}
-  ]
-]);
-
-var marker_2 = chart.getTimeline().lineMarker(1);
-marker_2.value(currentDate);
-marker_2.stroke("2 #dd2c00");
-
-
-var header = chart.getTimeline().header();
-header.level(2).format(function() {
-  return "Kazvu Lab's Development Phases and Milestones";
-});
-// header.level(2).fill("#64b5f6 0.2");
-header.level(2).stroke("#64b5f6");
-// header.level(2).fontColor("#64b5f6");
-header.level(2).fontWeight(1000);
-header.level(2).fontSize(30);
-// header.level(2).fontColor(black);
-
-
-header.level(2).height(35);
-=======
         var parentTasks = chart.getTimeline().groupingTasks();
         parentTasks.normal().fill("#0288d1");
         parentTasks.selected().fill("#0288d1");
@@ -189,7 +134,6 @@ header.level(2).height(35);
         var marker_2 = chart.getTimeline().lineMarker(1);
         marker_2.value(currentDate);
         marker_2.stroke("2 #dd2c00");
->>>>>>> 1844da3f49a3102392dc1b5230f1958a7f0a5edf
       });
     }
 
