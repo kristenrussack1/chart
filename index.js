@@ -1,4 +1,3 @@
-
 require("dotenv").config();
 const { Client } = require("@notionhq/client");
 
@@ -81,7 +80,15 @@ async function fetchProjects(projectName) {
                 status: {
                   does_not_equal: "Archived"
                 }
-              }
+              },
+              
+              {
+                property: "Task Status 1",
+                status: {
+                  does_not_equal: "Archived"
+                }
+              },
+             
             ]
           },
           sorts: [
@@ -99,6 +106,7 @@ async function fetchProjects(projectName) {
           actualEnd: subItem.properties["End Date"]?.date?.start || "End Date Not Available",
           children: await getSubItems(subItem.id), // Recursively fetch sub-items
           progressValue: subItem.properties["Progress"]?.number || 0,
+          lead: subItem.properties["Lead"]?.people[0]?.name || " ",
         })));
       } catch (error) {
         console.error("Error fetching sub-items:", error);
@@ -129,6 +137,15 @@ async function fetchProjects(projectName) {
             status: {
               does_not_equal: "Archived"
             }
+          },
+
+    
+
+          {
+            property: "Task Status 1",
+            status: {
+              does_not_equal: "Archived"
+            }
           }
           
         ]
@@ -143,6 +160,7 @@ async function fetchProjects(projectName) {
       parentId: task.properties["Parent item"]?.relation[0]?.id || null, // Corrected this line
       children: await getSubItems(task.id), // Fetch sub-items for each task
       progressValue: task.properties["Progress"]?.number || 0,
+      lead: task.properties["Lead"]?.people[0]?.name || " ",
     })));
 
     console.log("Tasks with Sub-items:", JSON.stringify(allTasks, null, 2));

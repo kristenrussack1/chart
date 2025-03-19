@@ -10,7 +10,6 @@
       margin: 0;
       height: 100%;
       width: 100%;
-      
     }
     #container1, #container2, #container3, #container4, #container5, #container6  {
       width: 100%;
@@ -20,11 +19,11 @@
 </head>
 <body>
   <div id="container1"></div>
-  <div id="container2"></div>
-  <div id="container3"></div>
+  <!-- <div id="container2"></div> -->
+  <!-- <div id="container3"></div>
   <div id="container4"></div>
   <div id="container5"></div>
-  <div id="container6"></div>
+  <div id="container6"></div> -->
   <script>
     async function fetchProjects(endpoint) {
       const rest = await fetch(`/${endpoint}`);
@@ -35,12 +34,7 @@
     // Fetch data from the backend and render the chart
     async function fetchDataAndRenderChart(endpoint, containerId, chartTitle) {
       const projects = await fetchProjects(endpoint);
-      
-
       const currentDate = new Date().toISOString().split('T')[0];
-
-
-      // const currentDate = new Date().toISOString().split('T')[0];
 
       anychart.onDocumentReady(function () {
         let formattedData = projects.map(value => ({
@@ -51,7 +45,8 @@
             children: value.children,
             container: { fill: "#dd2c00", stroke: "#dd2c00" },
             progressValue: value.progressValue,
-            progress: {fill: "15a9c7", stroke: "15a9c7"},
+            progress: { fill: "15a9c7", stroke: "15a9c7" },
+            lead: value.lead // Add lead field here
         }));
 
         // Create a data tree
@@ -73,7 +68,6 @@
         chart.getTimeline().markers().fill("dark red");
         chart.getTimeline().markers().stroke("dark red");
 
-
         chart.splitterPosition("15%");
 
         // Set the container id
@@ -91,30 +85,27 @@
         parentTasks.normal().stroke("#0288d1");
         parentTasks.selected().stroke("#0288d1");
 
-
-
-
-        //PROGRESS
+        // Configure task labels to show lead
         var tasks = chart.getTimeline().tasks();
-        tasks.progress().normal().fill("15a9c7");
-        tasks.progress().selected().fill("15a9c7");
-        tasks.progress().selected().stroke("15a9c7");
+        tasks.labels().format(function() {
+          return this.getData("name") + " / " + this.getData("lead"); // Display lead
+        });
 
-        // configure progress bars of parent tasks
-        var parentTasks = chart.getTimeline().groupingTasks();
-        parentTasks.progress().normal().fill("15a9c7");
-        parentTasks.progress().selected().fill("15a9c7");
-        parentTasks.progress().selected().stroke("15a9c7");
-
-
-
-        var tasks = chart.getTimeline().tasks();
         tasks.normal().fill("#15a9c7 0.5");
         tasks.selected().fill("#15a9c7");
         tasks.normal().stroke("#15a9c7");
         tasks.selected().stroke("#15a9c7");
 
         var milestones = chart.getTimeline().milestones();
+        milestones.labels().format(function() {
+          if (this.getData("lead") === " ") {
+          return this.getData("name");
+          } else {
+          return this.getData("name") + " (" + this.getData("lead") + ")"; // Display lead for milestones
+          }
+          });
+
+
         milestones.normal().fill("#5c6bc0 0.5");
         milestones.selected().fill("#5c6bc0");
         milestones.normal().stroke("#5c6bc0");
@@ -122,6 +113,7 @@
 
         milestones.markerType("diamond");
 
+        // Title customization
         var title = chart.title();
         title.enabled(true);
         title.text(chartTitle);
@@ -144,7 +136,8 @@
     fetchDataAndRenderChart("jfdi", "container5", "JFDI");
     fetchDataAndRenderChart("LaundryRobot", "container6", "Laundry Robot");
 
- 
   </script>
 </body>
 </html>
+
+
